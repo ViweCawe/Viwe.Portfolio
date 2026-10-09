@@ -1,0 +1,29 @@
+@page "/admin/{SectionName}/create"
+@page "/admin/{SectionName}/{Id:int}/edit"
+@inject PortfolioApiClient Api
+@inject NavigationManager Navigation
+<h1>@(Id is null ? "Create" : "Edit") @SectionName entry</h1>
+@if (error is not null) { <p role="alert">@error</p> }
+@if (entry is not null) {
+<EditForm Model="entry" OnValidSubmit="Save" FormName="portfolio-entry" class="editor"><DataAnnotationsValidator /><ValidationSummary />
+<label for="title">Title</label><InputText id="title" @bind-Value="entry.Title" />
+<label for="summary">Summary</label><InputTextArea id="summary" @bind-Value="entry.Summary" />
+<label for="body">Details</label><InputTextArea id="body" @bind-Value="entry.Body" />
+<label for="category">Category / status</label><InputText id="category" @bind-Value="entry.Category" />
+<label for="url">Link (optional, http or https)</label><InputText id="url" @bind-Value="entry.Url" />
+<label for="order">Display order</label><InputNumber id="order" @bind-Value="entry.DisplayOrder" />
+<label class="check"><InputCheckbox @bind-Value="entry.IsPublished" /> Publish on public page</label>
+<div class="actions"><button disabled="@busy" type="submit">@(busy ? "Saving…" : "Save entry")</button><a href="@($"/admin/{SectionName}")">Cancel</a></div></EditForm>
+}
+@code {
+    [Parameter] public string SectionName { get; set; } = "";
+    [Parameter] public int? Id { get; set; }
+    PortfolioEntry? entry; string? error; bool busy;
+    protected override async Task OnParametersSetAsync() {
+        entry = null; error = null;
+        if (!Enum.TryParse<PortfolioSection>(SectionName, true, out var section) || !Enum.IsDefined(section)) { error = "Unknown section."; return; }
+        try { entry = Id is null ? new PortfolioEntry { Section = section } : await Api.GetAsync(Id.Value); if (entry is null || entry.Section != section) { entry = null; error = "Entry not found in this section."; } }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or UnauthorizedAccessException) { error = "Could not load entry. Check the API, or sign in again."; }
+    }
+    async Task Save() { busy = true; error = null; try { await Api.SaveAsync(entry!); Navigation.NavigateTo($"/admin/{SectionName}"); } catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or UnauthorizedAccessException) { error = "Save failed. Your input is preserved. Check the API and database, or sign in again."; } finally { busy = false; } }
+}

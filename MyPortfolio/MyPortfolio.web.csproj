@@ -1,17 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>MyPortfolio</RootNamespace>
+    <UserSecretsId>viwe-portfolio-web</UserSecretsId>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
-
   <ItemGroup>
-    <Folder Include="Admin\About\" />
-    <Folder Include="Admin\Services\" />
-    <Folder Include="Admin\Projects\" />
-    <Folder Include="Admin\Skills\" />
+    <ProjectReference Include="../MyPortfolio.Core/MyPortfolio.Core.csproj" />
   </ItemGroup>
-
 </Project>

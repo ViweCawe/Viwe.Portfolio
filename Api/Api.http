@@ -1,6 +1,15 @@
-@Api_HostAddress = http://localhost:5270
+@Api = https://localhost:7280
 
-GET {{Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
+GET {{Api}}/health
 ###
+GET {{Api}}/api/portfolio/Projects
+###
+# Set credentials locally. Do not commit your password or token.
+POST {{Api}}/api/auth/login
+Content-Type: application/json
+
+{"userName":"admin","password":"REPLACE_LOCALLY"}
+###
+@Token = REPLACE_LOCALLY
+GET {{Api}}/api/admin/entries/section/Projects
+Authorization: Bearer {{Token}}

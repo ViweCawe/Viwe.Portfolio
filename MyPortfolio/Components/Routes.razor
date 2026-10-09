@@ -1,6 +1,3 @@
-﻿<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
-    <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
-    </Found>
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+<Found Context="routeData"><AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)"><NotAuthorized><p>You need to <a href="/account/login" data-enhance-nav="false">sign in</a> to use the admin area.</p></NotAuthorized></AuthorizeRouteView><FocusOnNavigate RouteData="routeData" Selector="h1" /></Found>
 </Router>
