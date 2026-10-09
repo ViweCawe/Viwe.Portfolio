@@ -1,0 +1,15 @@
+@page "/admin/{SectionName}"
+@inject PortfolioApiClient Api
+<h1>Manage @(section)</h1><p><a href="/admin">← Dashboard</a> · <a href="@($"/admin/{section}/create")">Create entry</a></p>
+@if (error is not null) { <p role="alert">@error <button @onclick="Load">Retry</button></p> }
+@if (items is null) { <p role="status">Loading…</p> }
+else { <div class="grid">@foreach (var item in items) { <article><h2>@item.Title</h2><p>@(item.IsPublished ? "Published" : "Draft") · Order @item.DisplayOrder</p><p>@item.Summary</p><a href="@($"/admin/{section}/{item.Id}/edit")">Edit</a>
+@if (confirm == item.Id) { <p>Archive this entry and remove it from public pages?</p><button disabled="@busy" @onclick="() => Archive(item.Id)">Confirm archive</button><button @onclick="() => confirm = null">Cancel</button> } else { <button class="secondary" @onclick="() => confirm = item.Id">Archive</button> }
+</article> }</div> }
+@code {
+    [Parameter] public string SectionName { get; set; } = "";
+    PortfolioSection section; List<PortfolioEntry>? items; string? error; int? confirm; bool busy;
+    protected override async Task OnParametersSetAsync() { if (!Enum.TryParse(SectionName, true, out section) || !Enum.IsDefined(section)) { error = "Unknown section."; items = []; return; } await Load(); }
+    async Task Load() { error = null; try { items = await Api.ListAsync(section, true); } catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or UnauthorizedAccessException) { error = "Unable to load content. Check the API and database, or sign in again."; items = []; } }
+    async Task Archive(int id) { busy = true; try { await Api.ArchiveAsync(id); confirm = null; await Load(); } catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or UnauthorizedAccessException) { error = "Archive failed. Your entry has not been removed from this view."; } finally { busy = false; } }
+}

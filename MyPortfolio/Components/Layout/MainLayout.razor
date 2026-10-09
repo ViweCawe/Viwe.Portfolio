@@ -1,23 +1,5 @@
-﻿@inherits LayoutComponentBase
-
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
-
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+@inherits LayoutComponentBase
+<header><a class="brand" href="/">Viwe<span>Cawe.</span></a><NavMenu /></header>
+<main id="main">@Body</main>
+<footer><p>Viwe Cawe · .NET Software Developer</p><a href="mailto:viwecawe12@gmail.com">Get in touch</a><a href="/account/login" data-enhance-nav="false">Admin</a></footer>
+<div id="blazor-error-ui">An unexpected error occurred. <a href="" class="reload">Reload</a></div>

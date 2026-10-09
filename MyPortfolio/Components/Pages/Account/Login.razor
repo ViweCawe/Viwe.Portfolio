@@ -1,0 +1,10 @@
+@page "/account/login"
+@attribute [ExcludeFromInteractiveRouting]
+<PageTitle>Admin sign in | Viwe Cawe</PageTitle>
+<h1>Admin sign in</h1><p>Use your configured administrator credentials.</p>
+@if (Error is not null) { <p role="alert">Sign in failed. Check your credentials and that the API is running. Wait a minute if you have tried repeatedly.</p> }
+<form method="post" action="/account/sign-in" class="editor" data-enhance="false"><AntiforgeryToken />
+<label for="username">Username</label><input id="username" name="username" autocomplete="username" maxlength="100" required />
+<label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" required />
+<button type="submit">Sign in</button></form>
+@code { [SupplyParameterFromQuery] public string? Error { get; set; } }

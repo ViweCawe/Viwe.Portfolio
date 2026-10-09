@@ -1,0 +1,19 @@
+@page "/about"
+@page "/skills"
+@page "/projects"
+@page "/services"
+@inject NavigationManager Navigation
+@inject PortfolioApiClient Api
+<PageTitle>@Section | Viwe Cawe</PageTitle>
+<p class="eyebrow">PORTFOLIO</p><h1>@Section</h1>
+@if (error is not null) { <div role="alert" class="notice">@error <button @onclick="Load">Try again</button></div> }
+else if (items is null) { <p role="status">Loading content…</p> }
+else if (items.Count == 0) { <p>Content is being prepared. Please check back soon.</p> }
+else { <div class="grid">@foreach (var item in items) { <article><p class="eyebrow">@item.Category</p><h2>@item.Title</h2><p>@item.Summary</p><p class="body-copy">@item.Body</p>@if (!string.IsNullOrWhiteSpace(item.Url)) { <a href="@item.Url" target="_blank" rel="noopener noreferrer">View link ↗</a> }</article> }</div> }
+@code {
+    PortfolioSection Section;
+    List<PortfolioEntry>? items;
+    string? error;
+    protected override async Task OnParametersSetAsync() { var path = new Uri(Navigation.Uri).AbsolutePath.Trim('/'); Enum.TryParse(path, true, out Section); await Load(); }
+    async Task Load() { items = null; error = null; try { items = await Api.ListAsync(Section); } catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException) { error = "Content is temporarily unavailable. You can still contact me by email."; } }
+}

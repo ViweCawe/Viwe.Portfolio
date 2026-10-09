@@ -1,0 +1,4 @@
+@page "/admin"
+<PageTitle>Admin | Viwe Cawe</PageTitle><h1>Manage your portfolio</h1><p>Create drafts, edit content and publish when ready. Archived content is retained in the database.</p>
+<div class="actions">@foreach (var section in Enum.GetValues<PortfolioSection>()) { <a class="button" href="@($"/admin/{section}")">@(section)</a> }</div>
+<form method="post" action="/account/logout" data-enhance="false"><AntiforgeryToken /><button class="secondary">Sign out</button></form>
