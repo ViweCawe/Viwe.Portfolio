@@ -29,8 +29,8 @@ The database project publishes schema; it is not a runtime reference. `Portfolio
 
 ## First run in Visual Studio
 
-1. Install Visual Studio with the .NET 10 SDK, ASP.NET/web development workload and SQL database tooling supporting SDK-style SQL projects. Install SQL Server Express LocalDB (Windows) or use SQL Server 2022+. Open `MyPortfolioApp.slnx`.
-2. Build the solution. Right-click `Database` → Publish. Target `(localdb)\MSSQLLocalDB`, database name `ViwePortfolio`. Inspect the generated script, then publish. If your Visual Studio SQL tooling does not expose Publish for SDK-style projects, use `SqlPackage` or open `Database/Scripts/CreateDevelopmentDatabase.sql` in SSMS, enable **Query → SQLCMD Mode**, and run it against LocalDB to create a new database. The script deliberately refuses an existing database; use publishing for later changes. Post-deployment seeds starter content only when the content table is empty. It never replaces edits on republish. CLI alternative: build the DACPAC and deploy it using `SqlPackage /Action:Publish` with your target connection string.
+1. Install Visual Studio with the .NET 10 SDK, ASP.NET/web development workload and the standard **SQL Server Data Tools** individual component (Visual Studio Installer → Modify → Individual components). Install SQL Server Express LocalDB (Windows) or use SQL Server 2022+. Open `MyPortfolioApp.slnx`.
+2. Build the solution. Right-click `Database` → Publish. Target `(localdb)\MSSQLLocalDB`, database name `ViwePortfolio`. Inspect the generated script, then publish. Alternatively, use `SqlPackage` or open `Database/Scripts/CreateDevelopmentDatabase.sql` in SSMS, enable **Query → SQLCMD Mode**, and run it against LocalDB to create a new database. The script deliberately refuses an existing database; use publishing for later changes. Post-deployment seeds starter content only when the content table is empty. It never replaces edits on republish. CLI alternative: build the DACPAC and deploy it using `SqlPackage /Action:Publish` with your target connection string.
 3. If using another SQL instance, set the API connection string through **API → Manage User Secrets**:
 
 ```json
@@ -98,10 +98,13 @@ Validation runs in both Blazor forms and API model binding. SQL procedures are p
 ## Checks and local troubleshooting
 
 ```powershell
-dotnet build MyPortfolioApp.slnx --configuration Release
+dotnet build Api/MyPortfolio.Api.csproj --configuration Release
+dotnet build MyPortfolio/MyPortfolio.web.csproj --configuration Release
+# Run this in a Visual Studio Developer PowerShell / Developer Command Prompt:
+msbuild Database/MyPortfolio.Database.sqlproj /p:Configuration=Release
 ```
 
-GitHub Actions builds all five projects, including the DACPAC. Database CRUD needs a real SQL Server instance and a published schema; it is not validated by a successful compile alone.
+GitHub Actions builds all five projects on Windows, using dotnet for the C# projects and Visual Studio MSBuild/SSDT for the database DACPAC. In Visual Studio, Build Solution builds all five. The original SQL project format requires SSDT; do not build the entire solution using dotnet MSBuild. Database CRUD needs a real SQL Server instance and a published schema; it is not validated by a successful compile alone.
 
 - **Cannot load content:** publish the database, check its name/instance and the API connection string. Ensure both startup projects are running.
 - **Cannot sign in:** configure the hash in the API's user secrets, trust HTTPS certificates, and check both hosts. After repeated attempts wait one minute.
@@ -133,12 +136,10 @@ After publishing to your local SQL Server:
 5. Repeat create/edit/publish/archive for About, Projects and Services. Test an invalid link, an empty title and a negative order; each must display a validation error without saving.
 6. Republish the database project. Confirm existing edits are preserved and seed entries are not duplicated.
 
-### Validation performed for this change
+## Fix for database project failing to load
 
-All five projects compiled in Release, including the database DACPAC, with zero warnings and zero errors. HTTP smoke checks passed. This Linux execution environment required single-process MSBuild and in-process SQL tasks:
+The database project uses the original Visual Studio SSDT format, not `Microsoft.Build.Sql/2.3.0`. The SDK-style conversion caused an SDK-resolution error on the user's Visual Studio installation. The database is still one project, at the same path; its tables, procedures and post-deployment seed are explicitly included. The target is SQL Server 2022, also supported by later SQL Server versions.
 
-```sh
-dotnet build MyPortfolioApp.slnx --configuration Release -m:1 -p:BuildInParallel=false -p:UseTaskHostFactory=false
-```
+After merging this fix, close Visual Studio, pull `main`, then reopen `MyPortfolioApp.slnx`. If the fix branch has not been merged, fetch and check out `fix/visual-studio-database` instead. Right-click the unloaded Database project and select Reload Project if necessary. If Visual Studio reports that SQL project support or SQL targets are missing, open Visual Studio Installer → Modify → Individual components and install the standard **SQL Server Data Tools** component. Do not install the SDK-style preview for this project.
 
-Those switches work around this environment's process-host restrictions; normal Visual Studio and GitHub Actions builds use the standard build command. Actual SQL deployment and the acceptance checklist remain to be run on a SQL Server instance.
+The initial SDK-style version passed CLI build and HTTP smoke checks, but that did not establish compatibility with the user's Visual Studio installation. This correction preserves the original project format and validates database builds on a Windows GitHub Actions runner with Visual Studio SSDT. Actual SQL deployment and CRUD still require the database acceptance checklist above.

@@ -1,7 +1,7 @@
 <Solution>
 <Project Path="Api/MyPortfolio.Api.csproj" />
 <Project Path="DataAcccess/MyPortfolio.DataAccess.csproj" />
-<Project Path="Database/MyPortfolio.Database.sqlproj"><Build /></Project>
+<Project Path="Database/MyPortfolio.Database.sqlproj" Id="9bab6174-5dad-4089-8cc5-cf558df8d58d"><Build /><Deploy /></Project>
 <Project Path="MyPortfolio.Core/MyPortfolio.Core.csproj" />
 <Project Path="MyPortfolio/MyPortfolio.web.csproj" />
 </Solution>
